@@ -1,0 +1,33 @@
+<!-- templates/auth.html-->
+
+{% extends "_basev2.html" %}
+
+{% block content %}
+
+<h1>Authentication</h1>
+
+
+    <form method="POST" action="">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Email" />
+        <br>
+        <input type="password" name="contrasena" placeholder="Contraseña" />
+        <br>
+        <input type="submit" value="Entrar" />
+{% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
+{% if mensaje %}
+    <h1>{{ mensaje }}</h1>
+{% endif %}
+
+{% endblock %}
+
+
+

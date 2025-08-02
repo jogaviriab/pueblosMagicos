@@ -1,7 +1,15 @@
 /* static/src/input.css */
 
 @import "tailwindcss";
-
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
+
+
+@theme {
+    --color-orange-300 : #f77f00;
+    --color-orange-200 : #fcbf49;
+    --color-orange-100 : #eae2b7;
+    --color-fire: #d62828;
+    --color-prussian: #003049;
+}

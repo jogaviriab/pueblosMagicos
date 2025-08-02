@@ -1,0 +1,29 @@
+{%  extends "_basev2.html" %}
+
+{% block content %}
+
+<form method="POST" action="">
+
+    {% csrf_token %}
+    <input type="text" name="nombre" placeholder="Nombre" value="" required />
+    <br>
+    <input type="text" name="apellido" placeholder="Apellido" value="" required/>
+    <br>
+    <input type="email" name="email" placeholder="Correo" value="" required/>
+    <br>
+    <input type="password" name="contrasena" placeholder="Contraseña" value="" required/>
+    <br>
+    <input type="password" name="confirmar_contrasena" placeholder="Confirmar Contraseña" value="" required/>
+    <br>
+    <input type="submit" placeholder="Enviar"  />
+</form>
+
+    {% if mensaje %}
+        <h1>{{ mensaje }}</h1>
+    {% endif %}
+    {% for usuario in  usuarios %}
+        <h1>{{ usuario }}</h1>
+    {% endfor %}
+
+
+{% endblock %}
