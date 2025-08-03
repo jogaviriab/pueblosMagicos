@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import check_password
 from gestorRutas.models import Usuario
 
@@ -14,7 +14,7 @@ def login(request):
             usuario = Usuario.objects.get(email=email)
             if check_password(contrasena, usuario.contrasena):
                 request.session['usuario_email'] = usuario.email
-                return render(request, 'panel.html', {'usuario': usuario})
+                return redirect('panel')
             else:
                 mensaje = 'correo o contraseña incorrectos'
         except:
@@ -25,4 +25,4 @@ def login(request):
 def logout(request):
     if 'usuario_email' in request.session:
         del request.session['usuario_email']
-    return render(request, 'index.html', {'mensaje': 'Sesión cerrada correctamente'})
+    return redirect('index')

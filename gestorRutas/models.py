@@ -23,16 +23,16 @@ class Ruta(models.Model):
     fecha = models.DateField()
     descripcion = models.TextField()
     distancia = models.FloatField()
-    duracion = models.DurationField()
+    duracion = models.FloatField()
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='rutas')
 
 class Recuerdo(models.Model):
     id = models.AutoField(primary_key=True)
-    ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, related_name='items')
+    ruta = models.ForeignKey(Ruta, null=True, on_delete=models.CASCADE, related_name='items')
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
-    orden = models.IntegerField()
-    destino = models.ForeignKey(Departamento, on_delete=models.CASCADE, related_name='recuerdos')
+    orden = models.IntegerField(null=True)
+    destino = models.ForeignKey(Departamento, null=True, on_delete=models.CASCADE, related_name='recuerdos')
 
 class Destino(models.Model):
     id = models.AutoField(primary_key=True)
@@ -44,6 +44,6 @@ class Archivo(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     archivo = models.TextField()
-    ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, related_name='archivos')
-    recuerdo = models.ForeignKey(Recuerdo, on_delete=models.CASCADE, related_name='archivos')
-    destino = models.ForeignKey(Destino, on_delete=models.CASCADE, related_name='archivos')
+    ruta = models.ForeignKey(Ruta, null=True, on_delete=models.CASCADE, related_name='archivos')
+    recuerdo = models.ForeignKey(Recuerdo, null=True, on_delete=models.CASCADE, related_name='archivos')
+    destino = models.ForeignKey(Destino, null=True, on_delete=models.CASCADE, related_name='archivos')

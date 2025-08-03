@@ -1,0 +1,126 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <h1>Crear Ruta</h1>
+
+    <form method="POST" enctype="multipart/form-data" class="max-w-5xl mx-auto">
+        {% csrf_token %}
+        <div class="grid md:grid-cols-2 md:gap-6 m-3.5">
+            <div> <!--Formulario informacion -->
+                <div class="mb-5">
+                    <label for="nombre" class="block mb-2 text-sm font-medium text-gray-900">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300  block w-full p-2.5 " placeholder="Nombre de la Ruta" required />
+                </div>
+                <div class="mb-5">
+                    <label for="message" class="block mb-2 text-sm font-medium text-gray-900">Descripción</label>
+                    <textarea id="message" name="descripcion" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-orange-300 focus:border-orange-300" placeholder="Pon una descripción..."></textarea>
+                </div>
+                <div class="mb-5">
+                    <label for="fecha" class="block mb-2 text-sm font-medium text-gray-900">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  focus:ring-orange-300 focus:border-orange-300  block w-full p-2.5 " required />
+                </div>
+                <div class="grid md:grid-cols-2 md:gap-6">
+                    <div class="relative z-0 w-full mb-5 group">
+                        <label for="distancia" class="block mb-2 text-sm font-medium text-gray-900">Distancia (Km)</label>
+                        <input type="number" name="distancia" id="distancia" class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300  block w-full p-2.5 " placeholder="Distancia en Km" required />
+                    </div>
+                    <div class="relative z-0 w-full mb-5 group">
+                        <label for="duracion" class="block mb-2 text-sm font-medium text-gray-900">Duración (Horas)</label>
+                        <input type="number" name="duracion" id="duracion" class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300  block w-full p-2.5 " placeholder="Duración del recorrido" required />
+                    </div>
+                </div>
+                <div class="flex justify-center align-center my-3.5 mt-3.5">
+                    <a href="{% url 'misRutas' %}" class="w-28 text-center py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-orange-200 focus:z-10 focus:ring-4 focus:ring-gray-100 ">Volver</a>
+                    <input type="submit" value="Crear Ruta" class="w-28 text-white bg-orange-300 hover:bg-orange-200 focus:ring-4 focus:ring-orange-200 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"/>
+                </div>
+            </div>
+            <div>
+                 <div id="archivos-container">
+                     <input type="hidden"  id="cantidad_archivos" name="cantidad_archivos" value="1">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 " for="archivo">Subir archivo</label>
+                    <input name="archivo1" accept="image/*,video/*" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50" id="archivo" type="file">
+                 </div>
+                <div class="justify-center align-center flex mt-3.5 my-3.5">
+                    <button type="button" onclick="agregarArchivo()" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-500 font-medium rounded-lg text-sm w-10 py-2.5 me-2 mb-2 w-2.5 ">+</button>
+                    <button type="button" onclick="eliminarArchivo()" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-500 font-medium rounded-lg text-sm  py-2.5 me-2 mb-2 w-10 align-center justify-center">-</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+<script>
+let cont = 2;
+function agregarArchivo() {
+    const container = document.getElementById('archivos-container');
+    const input = document.createElement('input');
+    const cantidad = document.getElementById('cantidad_archivos');
+    input.type = 'file';
+    input.name = 'archivo' + cont;
+    input.accept = 'image/*,video/*';
+    input.className = 'block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 mt-2';
+    input.addEventListener('change', mostrarPreview);
+    container.appendChild(input);
+    cont++;
+    cantidad.value = cont-1;
+}
+
+function eliminarArchivo() {
+    const container = document.getElementById('archivos-container');
+    const inputs = container.querySelectorAll('input[type="file"]');
+    const previews = container.querySelectorAll('.preview-media');
+    const cantidad = document.getElementById('cantidad_archivos');
+    if (inputs.length > 1) {
+        if (previews.length > 0 && previews[previews.length - 1].previousElementSibling === inputs[inputs.length - 1]) {
+            container.removeChild(previews[previews.length - 1]);
+        }
+        container.removeChild(inputs[inputs.length - 1]);
+        cont--;
+        cantidad.value = cont-1;
+    }
+}
+
+function mostrarPreview(event) {
+    const input = event.target;
+    let preview = input.nextElementSibling;
+    if (preview && preview.classList.contains('preview-media')) {
+        preview.remove();
+    }
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        let mediaElement;
+        if (file.type.startsWith('image/')) {
+            mediaElement = document.createElement('img');
+            mediaElement.className = 'preview-media h-auto my-3.5 rounded-lg';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mediaElement.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+            mediaElement = document.createElement('video');
+            mediaElement.className = 'preview-media h-auto my-3.5 rounded-lg';
+            mediaElement.controls = true;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mediaElement.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+        if (mediaElement) {
+            input.parentNode.insertBefore(mediaElement, input.nextSibling);
+        }
+    }
+}
+
+// Asigna el evento y el atributo accept al input inicial
+document.addEventListener('DOMContentLoaded', function() {
+    const inputInicial = document.querySelector('#archivo');
+    if (inputInicial) {
+        inputInicial.accept = 'image/*,video/*';
+        inputInicial.addEventListener('change', mostrarPreview);
+    }
+});
+</script>
+
+{% endblock %}
