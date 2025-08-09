@@ -38,12 +38,14 @@ class Destino(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
+    ruta = models.ForeignKey(Ruta, null=True, on_delete=models.CASCADE, related_name='destinos')
     municipio = models.ForeignKey(Municipio, on_delete=models.CASCADE, related_name='destinos')
 
 class Archivo(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    archivo = models.TextField()
+    archivo = models.BinaryField()
+    tipo = models.CharField(max_length=100)
     ruta = models.ForeignKey(Ruta, null=True, on_delete=models.CASCADE, related_name='archivos')
     recuerdo = models.ForeignKey(Recuerdo, null=True, on_delete=models.CASCADE, related_name='archivos')
     destino = models.ForeignKey(Destino, null=True, on_delete=models.CASCADE, related_name='archivos')

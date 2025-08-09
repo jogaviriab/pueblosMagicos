@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, redirect
-from .models import Usuario, Ruta, Archivo
+from .models import Usuario, Ruta, Archivo, Departamento, Municipio,Destino
 import base64
 from datetime import datetime
 
@@ -46,9 +46,26 @@ def misRutas(request):
         return redirect('login')
     else:
         rutas = Ruta.objects.filter(usuario__email=request.session['usuario_email'])
-    return render(request, 'misRutas.html',{'rutas' : rutas})
+        archivos = Archivo.objects.filter(ruta__usuario__email=request.session['usuario_email'])
+
+
+
+        archivos_context = []
+        for archivo in archivos:
+            archivos_context.append({
+                'nombre': archivo.nombre,
+                'ruta_id': archivo.ruta_id,
+                'tipo': archivo.tipo,
+                'archivo': base64.b64encode(archivo.archivo).decode('utf-8'),  # Esto da solo el string base64
+            })
+
+        destinos = Destino.objects.filter(ruta__usuario__email=request.session['usuario_email'])
+
+    return render(request, 'misRutas.html',{'rutas' : rutas, 'archivos': archivos_context,'destinos': destinos})
 
 def crearRuta(request):
+    departamentos = Departamento.objects.all()
+    municipios = Municipio.objects.all()
     if 'usuario_email' not in request.session:
         messages.error(request, 'Debes iniciar sesión para crear una ruta')
         return redirect('login')
@@ -60,13 +77,11 @@ def crearRuta(request):
         fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
         distancia = request.POST.get('distancia')
         duracion = request.POST.get('duracion')
-
-        print("IMprimiendo datos de la ruta")
-        print(nombre, descripcion, fecha, distancia, duracion)
+        estado = request.POST.get('estado')
 
         ruta = Ruta(
             nombre=nombre,
-            estado='En curso',
+            estado=estado,
             descripcion=descripcion,
             fecha=fecha,
             distancia=distancia,
@@ -76,19 +91,55 @@ def crearRuta(request):
         ruta.save()
         #archivos
         cantidad_archivos = request.POST.get('cantidad_archivos')
-        print(cantidad_archivos)
         for i in range(1,int(cantidad_archivos)+1):
-            print(i)
-            print(f'archivo{i}')
             archivo = request.FILES.get(f'archivo{i}')
-            archivo_b64 = base64.b64encode(archivo.read())
             archivo_model = Archivo(
                 nombre="archivo-1 "+nombre,
                 ruta=ruta,
-                archivo=archivo_b64,
+                archivo=archivo.read(),
+                tipo=archivo.content_type,
             )
             archivo_model.save()
+
+        #destinos
+        cantidadDestios = request.POST.get('cantidad_destinos')
+        for i in range(1,int(cantidadDestios)+1):
+            nombreDestino = f'destino{i}'
+            descripcionDestino = 'No hay descripcion'
+            idMunicipio = request.POST.get(f'municipio{i}')
+            municipio = Municipio.objects.get(id=idMunicipio)
+            destino = Destino(
+                nombre=nombreDestino,
+                descripcion=descripcionDestino,
+                ruta=ruta,
+                municipio=municipio,
+            )
+            destino.save()
+
         messages.success(request, 'Ruta creada correctamente')
         return redirect('misRutas')
 
-    return render(request, 'crearRuta.html')
+    return render(request, 'crearRuta.html',{'departamentos': departamentos, 'municipios': municipios})
+
+def verRuta(request, ruta_id):
+    if 'usuario_email' not in request.session:
+        messages.error(request, 'Debes iniciar sesión para ver la ruta')
+        return redirect('login')
+
+    try:
+        ruta = Ruta.objects.get(id=ruta_id, usuario__email=request.session['usuario_email'])
+        archivos = Archivo.objects.filter(ruta=ruta)
+        destinos = Destino.objects.filter(ruta=ruta)
+    except Ruta.DoesNotExist:
+        messages.error(request, 'Ruta no encontrada')
+        return redirect('misRutas')
+
+    archivos_context = []
+    for archivo in archivos:
+        archivos_context.append({
+            'nombre': archivo.nombre,
+            'tipo': archivo.tipo,
+            'archivo': base64.b64encode(archivo.archivo).decode('utf-8'),
+        })
+
+    return render(request, 'verRuta.html', {'ruta': ruta, 'archivos': archivos_context, 'destinos': destinos})

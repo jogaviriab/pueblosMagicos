@@ -29,6 +29,44 @@
                         <input type="number" name="duracion" id="duracion" class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300  block w-full p-2.5 " placeholder="Duración del recorrido" required />
                     </div>
                 </div>
+                <div class="mb-5">
+                    <label for="estado" class="block mb-2 text-sm font-medium text-gray-900">Estado:</label>
+                    <select id="estado" name="estado" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300 block w-full p-2.5">
+                        <option value="">Seleccione un departamento</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En curso">En curso</option>
+                        <option value="Finalizada">Finalizada</option>
+                        </select>
+                </div>
+                {# Destinos #}
+                <input type="hidden" id="cantidad_destinos" name="cantidad_destinos" value="1" />
+                <div id="destino_container">
+                    <div class="grid md:grid-cols-2 md:gap-6">
+                        <div class="relative z-0 w-full mb-5 group">
+                            <label for="departamento" class="block mb-2 text-sm font-medium text-gray-900 ">Select an option</label>
+                                <select id="departamento" name="departamento1" class="departamento bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300 block w-full p-2.5">
+                                    <option value="">Seleccione un departamento</option>
+                                    {% for departamento in departamentos %}
+                                        <option value="{{ departamento.id }}">{{ departamento.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                        </div>
+                        <div class="relative z-0 w-full mb-5 group">
+                            <label for="municipio" class="block mb-2 text-sm font-medium text-gray-900 ">Select an option</label>
+                                <select id="municipio" name="municipio1" class="departamento bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-300 focus:border-orange-300 block w-full p-2.5">
+                                    {% for municipio in municipios %}
+                                        <option value="{{ municipio.id }}" data-departamento="{{ municipio.departamento.id }}">{{ municipio.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="justify-center align-center flex mt-3.5 my-3.5">
+                    <button type="button" onclick="agregarDestino()" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-500 font-medium rounded-lg text-sm w-10 py-2.5 me-2 mb-2 w-2.5 ">+</button>
+                    <button type="button" onclick="eliminarDestino()" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-500 font-medium rounded-lg text-sm  py-2.5 me-2 mb-2 w-10 align-center justify-center">-</button>
+                </div>
+
                 <div class="flex justify-center align-center my-3.5 mt-3.5">
                     <a href="{% url 'misRutas' %}" class="w-28 text-center py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-orange-200 focus:z-10 focus:ring-4 focus:ring-gray-100 ">Volver</a>
                     <input type="submit" value="Crear Ruta" class="w-28 text-white bg-orange-300 hover:bg-orange-200 focus:ring-4 focus:ring-orange-200 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2"/>
@@ -50,6 +88,124 @@
 
 
 <script>
+let destinoCont = 2;
+let municipioOriginalHTML = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const departamentoSelect = document.getElementById('departamento');
+    const municipioSelect = document.getElementById('municipio');
+
+    // Guardar el HTML original del municipio antes de modificarlo
+    municipioOriginalHTML = municipioSelect.outerHTML;
+
+    // Configurar filtro para el primer par de selects
+    configurarFiltro(departamentoSelect, municipioSelect);
+});
+
+function configurarFiltro(departamentoSelect, municipioSelect) {
+    // Guardar todas las opciones originales de municipio (excepto la opción por defecto)
+    municipioSelect._allOptions = Array.from(municipioSelect.options).slice(1);
+
+    // Limpiar y dejar solo la opción por defecto
+    municipioSelect.innerHTML = '';
+    const defaultOption = new Option('Seleccione un municipio', '');
+    municipioSelect.appendChild(defaultOption);
+
+    // Función de filtrado específica para este par de selects
+    function filtrarMunicipios() {
+        const departamentoId = departamentoSelect.value;
+        municipioSelect.innerHTML = '';
+        municipioSelect.appendChild(new Option('Seleccione un municipio', ''));
+
+        if (departamentoId) {
+            municipioSelect._allOptions.forEach(opcion => {
+                if (opcion.getAttribute('data-departamento') == departamentoId) {
+                    municipioSelect.appendChild(opcion.cloneNode(true));
+                }
+            });
+        }
+    }
+
+    // Asignar el evento
+    departamentoSelect.addEventListener('change', filtrarMunicipios);
+
+    // Ejecutar filtro inicial si hay valor seleccionado
+    if (departamentoSelect.value) {
+        filtrarMunicipios();
+    }
+}
+
+function agregarDestino() {
+    const destinoContainer = document.getElementById('destino_container');
+    const cantidadDestinos = document.getElementById('cantidad_destinos');
+    cantidadDestinos.value = destinoCont;
+    console.log(cantidadDestinos.value);
+
+    const gridDiv = document.createElement('div');
+    gridDiv.className = 'grid md:grid-cols-2 md:gap-6 destino-item';
+
+    const departamentoDiv = document.createElement('div');
+    departamentoDiv.className = 'relative z-0 w-full mb-5 group';
+
+    const municipioDiv = document.createElement('div');
+    municipioDiv.className = 'relative z-0 w-full mb-5 group';
+
+    // Clonar departamento (usa el elemento original como base)
+    const departamentoOriginal = document.getElementById('departamento');
+    const departamentoClone = departamentoOriginal.cloneNode(true);
+    departamentoClone.id = 'departamento' + destinoCont;
+    departamentoClone.name = 'departamento' + destinoCont;
+    departamentoClone.selectedIndex = 0; // Reiniciar selección
+
+    // Clonar municipio usando el HTML original guardado
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = municipioOriginalHTML;
+    const municipioClone = tempDiv.firstChild;
+    municipioClone.id = 'municipio' + destinoCont;
+    municipioClone.name = 'municipio' + destinoCont;
+
+    // Crear etiquetas
+    const labelDep = document.createElement('label');
+    labelDep.htmlFor = departamentoClone.id;
+    labelDep.className = 'block mb-2 text-sm font-medium text-gray-900';
+    labelDep.textContent = 'Seleccione un departamento';
+
+    const labelMun = document.createElement('label');
+    labelMun.htmlFor = municipioClone.id;
+    labelMun.className = 'block mb-2 text-sm font-medium text-gray-900 ms-4';
+    labelMun.textContent = 'Seleccione un municipio';
+
+    // Ensamblar elementos
+    departamentoDiv.appendChild(labelDep);
+    departamentoDiv.appendChild(departamentoClone);
+    municipioDiv.appendChild(labelMun);
+    municipioDiv.appendChild(municipioClone);
+    gridDiv.appendChild(departamentoDiv);
+    gridDiv.appendChild(municipioDiv);
+    destinoContainer.appendChild(gridDiv);
+
+    // Configurar filtro para el nuevo par
+    configurarFiltro(departamentoClone, municipioClone);
+
+    destinoCont++;
+
+}
+
+function eliminarDestino() {
+    const destinoContainer = document.getElementById('destino_container');
+    const destinos = destinoContainer.querySelectorAll('.destino-item');
+
+    if (destinos.length > 1) {
+        destinoContainer.removeChild(destinos[destinos.length - 1]);
+        destinoCont--;
+        const cantidadDestinos = document.getElementById('cantidad_destinos');
+        cantidadDestinos.value = destinoCont - 1;
+        console.log(cantidadDestinos.value);
+    }
+}
+
+
+
 let cont = 2;
 function agregarArchivo() {
     const container = document.getElementById('archivos-container');
@@ -113,14 +269,15 @@ function mostrarPreview(event) {
     }
 }
 
-// Asigna el evento y el atributo accept al input inicial
-document.addEventListener('DOMContentLoaded', function() {
-    const inputInicial = document.querySelector('#archivo');
-    if (inputInicial) {
-        inputInicial.accept = 'image/*,video/*';
-        inputInicial.addEventListener('change', mostrarPreview);
-    }
-});
+    // Asigna el evento y el atributo accept al input inicial
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputInicial = document.querySelector('#archivo');
+        if (inputInicial) {
+            inputInicial.accept = 'image/*,video/*';
+            inputInicial.addEventListener('change', mostrarPreview);
+        }
+    });
+
 </script>
 
 {% endblock %}

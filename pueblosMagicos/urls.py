@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from gestorRutas.views import crearUsuario,misRutas,crearRuta
+from gestorRutas.views import crearUsuario,misRutas,crearRuta, verRuta
 from .views import index,login, logout
 from gestorRutas.views import panel
 
@@ -31,4 +31,5 @@ urlpatterns = [
     path('panel/', panel, name='panel'),  # Asegúrate de definir esta vista si la necesitas
     path('misRutas/', misRutas, name='misRutas'),
     path('crearRuta/', crearRuta, name='crearRuta'),
+    path('verRuta/<int:ruta_id>/', verRuta, name='verRuta'),
 ]
