@@ -128,12 +128,12 @@ def verRuta(request, ruta_id):
 
     try:
         ruta = Ruta.objects.get(id=ruta_id, usuario__email=request.session['usuario_email'])
-        archivos = Archivo.objects.filter(ruta=ruta)
-        destinos = Destino.objects.filter(ruta=ruta)
+        archivos = Archivo.objects.filter(ruta_id=ruta)
+        destinos = Destino.objects.filter(ruta_id=ruta)
     except Ruta.DoesNotExist:
         messages.error(request, 'Ruta no encontrada')
         return redirect('misRutas')
-
+    print(f'Cantidad de archivos: {len(archivos)}')
     archivos_context = []
     for archivo in archivos:
         archivos_context.append({
@@ -141,5 +141,7 @@ def verRuta(request, ruta_id):
             'tipo': archivo.tipo,
             'archivo': base64.b64encode(archivo.archivo).decode('utf-8'),
         })
+    print(f'Cantidad de archivos context: {len(archivos_context)}')
+    cantidad=len(archivos_context)
 
-    return render(request, 'verRuta.html', {'ruta': ruta, 'archivos': archivos_context, 'destinos': destinos})
+    return render(request, 'verRuta.html', {'ruta': ruta, 'archivos': archivos_context, 'destinos': destinos, 'cantidad': cantidad})
