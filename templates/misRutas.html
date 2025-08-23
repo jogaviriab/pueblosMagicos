@@ -1,6 +1,8 @@
 {% extends '_base.html' %}
 
 {% block content %}
+
+
     <div class="text-center">
         <h1 class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl">Mis Rutas</h1>
         <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">Aquí encontrarás tus rutas, las cuales podrás modificar o eliminar, o incluso crear nuevas</p>
@@ -19,12 +21,16 @@
                     <div id="indicators-carousel" class="relative w-full" data-carousel="static">
                         <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
                             {% if archivos %}
+
                                 <a href="{% url 'verRuta' ruta.id %}">
+
                                     {% for archivo in archivos %}
                                         {% if archivo.ruta_id == ruta.id %}
+
                                             {% if archivo.tipo != 'video/mp4' %}
                                                 {% if forloop.first %}
                                                     <div class="hidden duration-700 ease-in-out" data-carousel-item="active">
+
                                                         <img src="data:image/png;base64,{{ archivo.archivo }}" class="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="...">
                                                     </div>
                                                 {% else %}
