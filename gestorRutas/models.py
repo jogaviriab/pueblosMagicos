@@ -45,7 +45,7 @@ class Archivo(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     archivo = models.BinaryField()
-    tipo = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=100, default='image/png')
     ruta = models.ForeignKey(Ruta, null=True, on_delete=models.CASCADE, related_name='archivos')
     recuerdo = models.ForeignKey(Recuerdo, null=True, on_delete=models.CASCADE, related_name='archivos')
     destino = models.ForeignKey(Destino, null=True, on_delete=models.CASCADE, related_name='archivos')

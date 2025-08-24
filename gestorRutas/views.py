@@ -29,7 +29,7 @@ def crearUsuario(request):
         usuario.save()
 
         messages.success(request, 'Usuario creado correctamente')
-        return redirect('auth')
+        return redirect('login')
 
     return render(request, 'crearUsuario.html')
 
@@ -145,3 +145,23 @@ def verRuta(request, ruta_id):
     cantidad=len(archivos_context)
 
     return render(request, 'verRuta.html', {'ruta': ruta, 'archivos': archivos_context, 'destinos': destinos, 'cantidad': cantidad})
+
+def eliminarRuta(request, ruta_id):
+    print("En eliminar ruta")
+    if 'usuario_email' not in request.session:
+        messages.error(request, 'Debes iniciar sesión para eliminar la ruta')
+        print("Sesion No inicada")
+        return redirect('login')
+    try:
+        ruta = Ruta.objects.get(id=ruta_id, usuario__email=request.session['usuario_email'])
+        print("Ruta encontrada")
+
+
+        ruta.delete()
+        messages.success(request, 'Ruta eliminada correctamente')
+        print("Ruta eliminada correctamente")
+    except Ruta.DoesNotExist:
+        messages.error(request, 'Ruta no encontrada')
+        print("Ruta no encontrada")
+
+    return redirect('misRutas')
